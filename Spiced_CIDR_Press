@@ -1,0 +1,41 @@
+# Spiced CIDR Press takes a list of IP address ranges in a text doc, row by row, and returns the CIDR ranges WITHOUT including additional IP addresses
+# The list of CIDRs returned will almost always be greater than the number of rows because it will need to create incrementally smaller CIDR ranges for the remainder IP addresses per range
+# This is helpful for anyone who needs to convert manually maintained safelists or lists of ranges to safelist into a format that a network device or server can more readily use
+# Inversely, this also can be used to create a blocklist if we have a range of IP addresses that we want to deny entry to but they are not yet in a CIDR format
+# This script basically takes raw IP addresses and presses it into a CIDR, much like an apple cider press ;-)
+# This script was used to save a platform engineering team I was on many, many hours of manual conversion when we had to create a safelist as part of a WAF migration and the existing solution was literally a massive text with thousands of rows of IP ranges that had accumulated for over a decade
+# If you're wondering why that was a thing, it was a mandatory requirement for specific clients that an Internet web app not be available to just anyone, so this was the app team's solution that we had to modernize!
+# Sample IP list will be included as an example for the expected format for delimitation 
+#
+# Written by Andrew Wilson | techstudybuddy.net | linkedin.com/in/andrewwilson54
+
+import ipaddress
+import sys
+
+# Ingests the beginning and ending IP address for the provided range
+# This then creates the smallest possible amount of classless IP address ranges, a.k.a. CIDR ranges 
+def cidr_press(begin, end):
+    beginning = int(ipaddress.IPv4Address(begin))
+    ending = int(ipaddress.IPv4Address(end))
+    rge = range(beginning, ending + 1)
+    spiced_cidr = list(ipaddress.summarize_address_range(ipaddress.IPv4Address(begin), ipaddress.IPv4Address(end)))
+    return spiced_cidr
+
+# File manipulation to read the original list and then creates a new file with the CIDR format for each range provided
+# Gracefully exits when there is a formatting issue or the last line of the list is converted to CIDR format
+def pressing(iplist):
+    with open(iplist,'r') as iplist:
+        for ip in iplist:
+            try:
+                begin, end = ip.strip().split(' - ')
+                cidr = cidr_press(begin, end)
+                with open('fresh_cidr.txt','a') as fresh_cidr:
+                    for c in cidr:
+                        fresh_cidr.write(str(c)+'\n')
+            except ValueError:
+                break
+    sys.exit()
+
+# Runs the command on the ips.txt doc
+# Either change the file name below or the text doc name with the IP range list so that they match
+pressing('ips.txt')
