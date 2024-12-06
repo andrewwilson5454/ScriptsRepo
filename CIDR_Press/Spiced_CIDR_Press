@@ -1,1 +1,35 @@
+# Transform IP ranges in plaintext in xxx.xxx.xxx.xxx - xxx.xxx.xxx.xxx format into CIDR notation
+# Uses the smallest amount of classless subnets possible to include ONLY the IP addresses in the range so no additional IP addresses are included
+# Written by Andrew Wilson | techstudybuddy.net | linkedin.com/in/andrewwilson54
 
+# ipaddress library does most of the heavy-lifting here and the sys library helps with exiting the program gracefully
+import ipaddress
+import sys
+
+# Ingests the beginning and ending IP address for the provided range
+# This then creates the smallest possible amount of classless IP address ranges, a.k.a. CIDR ranges 
+def cidr_press(begin, end):
+    beginning = int(ipaddress.IPv4Address(begin))
+    ending = int(ipaddress.IPv4Address(end))
+    rge = range(beginning, ending + 1)
+    spiced_cidr = list(ipaddress.summarize_address_range(ipaddress.IPv4Address(begin), ipaddress.IPv4Address(end)))
+    return spiced_cidr
+
+# File manipulation to read the original list and then creates a new file with the CIDR format for each range provided
+# Gracefully exits when there is a formatting issue or the last line of the list is converted to CIDR format
+def pressing(iplist):
+    with open(iplist,'r') as iplist:
+        for ip in iplist:
+            try:
+                begin, end = ip.strip().split(' - ')
+                cidr = cidr_press(begin, end)
+                with open('fresh_cidr.txt','a') as fresh_cidr:
+                    for c in cidr:
+                        fresh_cidr.write(str(c)+'\n')
+            except ValueError:
+                break
+    sys.exit()
+
+# Runs the command on the ips.txt doc
+# Either change the file name below or the text doc name with the IP range list so that they match
+pressing('ips.txt')
