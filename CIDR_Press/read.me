@@ -1,5 +1,11 @@
-This is a simple script that takes a range of IP addresses in a text doc, row by row, and creates corresponding CIDR notation ranges for each row
+This script takes raw IP addresses and presses it into a CIDR, much like an apple cider press : )
+
+This is helpful for anyone who needs to convert manually maintained safelists or lists of ranges to safelist into a format that a network device or server can more readily use
+
+Inversely, this also can be used to create a blocklist if we have a range of IP addresses that we want to deny entry to but they are not yet in a CIDR format
 
 The output will almost always include more CIDR ranges as this script will not include additional IP addresses -- just those that are included in the initial range
 
 Refer to the sample script for how the script expects the plaintext doc to be formatted
+
+If you're wondering why that was a thing, it was a mandatory requirement for specific clients that an Internet web app not be available to just anyone, so this was the app team's solution that we had to modernize!
